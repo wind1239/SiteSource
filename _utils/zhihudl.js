@@ -1,4 +1,7 @@
-
+// Run node zhihudl.js sync 
+// To sync all urls in answers.sync.txt
+// Use git diff to generate answers.sync.txt
+// $ git diff answers.txt |grep "^+"|grep -v "^+++"|sed 's/^+//' > answers.sync.txt
 function noop() {}
 
 
@@ -64,7 +67,8 @@ function main() {
 
 
   function sync(force) {
-    var ans = readFile("answers.sync.txt");
+    var answersListFile = "answers.sync.txt";
+    var ans = readFile(answersListFile);
     ans = ans.trim().split(/[\n\r]+/);
     console.log("Before:"+ans.length/2);
     var urlsMap = new Map();
@@ -101,7 +105,7 @@ function main() {
     }).join("\n\n");
     
     
-    writeFileWith("answers.txt",content);
+    writeFileWith(answersListFile,content);
     
     
   }
@@ -110,7 +114,11 @@ function main() {
   function dlAnswer(aid,cats,tags,force) {
 
     getAnswer(aid).then(a => {
-      /* {author:{name: '',user_type: 'people',id: '2e80081026e7335ea4ef8b7906103f60' },
+      if (a.error) {
+        console.error(a.error);
+        process.exit(1);
+      }
+      /* {author:{name: '',user_type: 'people',id: '' },
       question:{title: '',id: 21476991,created:2334},
       updated_time: 1501092668,
       content: 'XXX',created_time: 1465144810,updated_time:234,id: 104484293}
@@ -197,6 +205,7 @@ function download(url,file) {
   var request = https.get(url, {
     encoding: 'binary',
     headers: {
+      "Referer":"https://www.zhihu.com/",
       "Connection": "keep-alive"
     }
   }, function(res) {
@@ -264,7 +273,7 @@ function req(url,opt) {
     //console.log("Fecth: "+ url)
     resp.json = ()=>{
       var ct = resp.headers.get("content-type") || "";
-      if(~ct.indexOf("application/json")) {
+      if(ct.indexOf("application/json")>-1) {
         /*return resp.text().then(t=>{
           console.log(t);
           return JSON.parse(t);
