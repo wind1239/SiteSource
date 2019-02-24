@@ -33,3 +33,7 @@ markdown: kramdown
 plugins: ['jekyll-paginate', 'jekyll-category-pages']
 
 exclude: ['README.md', 'LICENSE', "*.bak"]
+
+
+
+paginate_path: "/page/:num/"
